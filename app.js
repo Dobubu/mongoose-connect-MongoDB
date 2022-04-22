@@ -102,6 +102,39 @@ const requestListener = async (req, res) => {
         res.end();
       };
     });
+  } else if(url.startsWith('/posts/') && method === 'PATCH') {
+    req.on('end', async () => {
+      try {
+        const id = req.url.split('/').pop();
+        const isExist = data.find(o => o.id === id);
+  
+        if(!isExist) throw new Error('post not exist.')
+
+        const updateData = JSON.parse(body);
+        if(!updateData.content) throw new Error('content field required');
+        
+        const updatePostRes = await Post.findByIdAndUpdate(id, {
+          content: updateData.content,
+        });
+        res.writeHead(200, headers);
+        res.write(JSON.stringify({
+          'status': 'success',
+          data: updatePostRes
+        }));
+
+        res.end();
+      } catch (e) {
+        const errorMsg = e.message || 'parse error.';
+
+        res.writeHead(400, headers);
+        res.write(JSON.stringify({
+          'status': 'false',
+          'message': errorMsg
+        }));
+        
+        res.end();
+      }
+    });
   } else if(method === 'OPTIONS') {
     res.writeHead(200, headers);
     res.end();
