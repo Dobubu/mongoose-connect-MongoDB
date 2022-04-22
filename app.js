@@ -135,6 +135,16 @@ const requestListener = async (req, res) => {
         res.end();
       }
     });
+  } else if(url === '/posts' && method === 'DELETE') {
+    await Post.deleteMany({});
+
+    res.writeHead(200, headers);
+    res.write(JSON.stringify({
+      'status': 'success',
+      data: []
+    }));
+    
+    res.end();
   } else if(method === 'OPTIONS') {
     res.writeHead(200, headers);
     res.end();
