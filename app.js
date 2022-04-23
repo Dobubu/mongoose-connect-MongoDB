@@ -145,6 +145,35 @@ const requestListener = async (req, res) => {
     }));
     
     res.end();
+  } else if(url.startsWith('/posts/') && method === 'DELETE') {
+    req.on('end', async () => {
+      try {
+        const id = req.url.split('/').pop();
+        const isExist = data.find(o => o.id === id);
+  
+        if(!isExist) throw new Error('post not exist.')
+
+        await Post.findByIdAndDelete(id);
+
+        res.writeHead(200, headers);
+        res.write(JSON.stringify({
+          'status': 'success',
+          'message': 'delete success'
+        }));
+
+        res.end();
+      } catch (e) {
+        const errorMsg = e.message || 'parse error.';
+
+        res.writeHead(400, headers);
+        res.write(JSON.stringify({
+          'status': 'false',
+          'message': errorMsg
+        }));
+        
+        res.end();
+      }
+    });
   } else if(method === 'OPTIONS') {
     res.writeHead(200, headers);
     res.end();
