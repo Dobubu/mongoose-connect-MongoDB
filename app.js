@@ -1,6 +1,10 @@
 const http = require('http');
 const mongoose = require('mongoose');
 
+const headers = require('./service/headers');
+const handleSuccess = require('./service/handleSuccess');
+const handleError = require('./service/handleError');
+
 mongoose.connect('mongodb://localhost:27017/postDB')
   .then(() => console.log('db connect success'))
   .catch(e => console.log(e));
@@ -47,13 +51,6 @@ const PostsSchema = new mongoose.Schema(
 );
 const Post = mongoose.model('Post', PostsSchema);
 
-const headers = {
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization, Content-Length, X-Requested-With',
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'PATCH, POST, GET,OPTIONS,DELETE',
-  'Content-Type': 'application/json'
-};
-
 const requestListener = async (req, res) => {
   const { url, method } = req;
   const data = await Post.find();
@@ -64,12 +61,7 @@ const requestListener = async (req, res) => {
   });
 
   if(url === '/posts' && method === 'GET') {
-    res.writeHead(200, headers);
-    res.write(JSON.stringify({
-      'status': 'success',
-      data
-    }));
-    res.end();
+    handleSuccess(res, data);
   } else if(url === '/posts' && method === 'POST') {
     req.on('end', async () => {
       try {
@@ -83,23 +75,10 @@ const requestListener = async (req, res) => {
           type,
           tags
         });
-        res.writeHead(200, headers);
-        res.write(JSON.stringify({
-          'status': 'success',
-          data: newPost
-        }));
 
-        res.end();
+        handleSuccess(res, newPost);
       } catch (e) {
-        const errorMsg = e.message || 'parse error.';
-
-        res.writeHead(400, headers);
-        res.write(JSON.stringify({
-          'status': 'false',
-          'message': errorMsg
-        }));
-        
-        res.end();
+        handleError(res, e);
       };
     });
   } else if(url.startsWith('/posts/') && method === 'PATCH') {
@@ -116,35 +95,16 @@ const requestListener = async (req, res) => {
         const updatePostRes = await Post.findByIdAndUpdate(id, {
           content: updateData.content,
         });
-        res.writeHead(200, headers);
-        res.write(JSON.stringify({
-          'status': 'success',
-          data: updatePostRes
-        }));
 
-        res.end();
+        handleSuccess(res, updatePostRes);
       } catch (e) {
-        const errorMsg = e.message || 'parse error.';
-
-        res.writeHead(400, headers);
-        res.write(JSON.stringify({
-          'status': 'false',
-          'message': errorMsg
-        }));
-        
-        res.end();
+        handleError(res, e);
       }
     });
   } else if(url === '/posts' && method === 'DELETE') {
     await Post.deleteMany({});
 
-    res.writeHead(200, headers);
-    res.write(JSON.stringify({
-      'status': 'success',
-      data: []
-    }));
-    
-    res.end();
+    handleSuccess(res, []);
   } else if(url.startsWith('/posts/') && method === 'DELETE') {
     req.on('end', async () => {
       try {
@@ -155,24 +115,10 @@ const requestListener = async (req, res) => {
 
         await Post.findByIdAndDelete(id);
 
-        res.writeHead(200, headers);
-        res.write(JSON.stringify({
-          'status': 'success',
-          'message': 'delete success'
-        }));
-
-        res.end();
+        handleSuccess(res, 'delete success');
       } catch (e) {
-        const errorMsg = e.message || 'parse error.';
-
-        res.writeHead(400, headers);
-        res.write(JSON.stringify({
-          'status': 'false',
-          'message': errorMsg
-        }));
-        
-        res.end();
-      }
+        handleError(res, e);
+      };
     });
   } else if(method === 'OPTIONS') {
     res.writeHead(200, headers);
