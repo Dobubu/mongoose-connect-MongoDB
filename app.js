@@ -1,59 +1,15 @@
 const http = require('http');
-const mongoose = require('mongoose');
+
+require('./connections');
+const Posts = require('./model/post');
 
 const headers = require('./service/headers');
 const handleSuccess = require('./service/handleSuccess');
 const handleError = require('./service/handleError');
 
-mongoose.connect('mongodb://localhost:27017/postDB')
-  .then(() => console.log('db connect success'))
-  .catch(e => console.log(e));
-
-const PostsSchema = new mongoose.Schema(
-  {
-    name: {
-      type: String,
-      required: [true, 'name field required']
-    },
-    image: {
-      type: String,
-      default: '',
-    },
-    content: {
-      type: String,
-      required: [true, 'content field required']
-    },
-    likes: {
-      type: Number,
-      default: 0
-    },
-    comments: {
-      type: Number,
-      default: 0
-    },
-    createdAt: {
-      type: Date,
-      default: Date.now
-    },
-    type: {
-      type: String,
-      enum:['group', 'person'],
-      required: [true, 'type field required']
-    },
-    tags: {
-      type: [String],
-      required: [true, 'tags field required']
-    }
-  },
-  {
-    versionKey: false,
-  }
-);
-const Post = mongoose.model('Post', PostsSchema);
-
 const requestListener = async (req, res) => {
   const { url, method } = req;
-  const data = await Post.find();
+  const data = await Posts.find();
 
   let body = '';
   req.on('data', chunk => {
@@ -68,7 +24,7 @@ const requestListener = async (req, res) => {
         const data = JSON.parse(body);
         const { name, image, content, type, tags } = data;
 
-        const newPost = await Post.create({
+        const newPost = await Posts.create({
           name,
           image,
           content,
@@ -92,7 +48,7 @@ const requestListener = async (req, res) => {
         const updateData = JSON.parse(body);
         if(!updateData.content) throw new Error('content field required');
         
-        const updatePostRes = await Post.findByIdAndUpdate(id, {
+        const updatePostRes = await Posts.findByIdAndUpdate(id, {
           content: updateData.content,
         });
 
@@ -102,7 +58,7 @@ const requestListener = async (req, res) => {
       }
     });
   } else if(url === '/posts' && method === 'DELETE') {
-    await Post.deleteMany({});
+    await Posts.deleteMany({});
 
     handleSuccess(res, []);
   } else if(url.startsWith('/posts/') && method === 'DELETE') {
@@ -113,7 +69,7 @@ const requestListener = async (req, res) => {
   
         if(!isExist) throw new Error('post not exist.')
 
-        await Post.findByIdAndDelete(id);
+        await Posts.findByIdAndDelete(id);
 
         handleSuccess(res, 'delete success');
       } catch (e) {
