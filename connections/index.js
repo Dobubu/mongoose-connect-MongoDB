@@ -1,5 +1,9 @@
 const mongoose = require('mongoose');
 
-mongoose.connect('mongodb://localhost:27017/postDB')
+require('dotenv').config();
+
+const DB = process.env.DATABASE.replace('<password>', process.env.DATABASE_PASSWORD);
+
+mongoose.connect(DB)
   .then(() => console.log('db connect success'))
   .catch(e => console.log(e));
