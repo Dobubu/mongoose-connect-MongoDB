@@ -1,11 +1,11 @@
-const Posts = require('../model/posts');
+const Post = require('../model/posts');
 
 const httpControllers = require('../controllers/cors');
 const postsControllers = require('../controllers/posts');
 
 const routes = async (req, res) => {
   const { url, method } = req;
-  const postList = await Posts.find();
+  const postList = await Post.find();
 
   let body = '';
   req.on('data', chunk => {

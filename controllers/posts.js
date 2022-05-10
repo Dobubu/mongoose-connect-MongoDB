@@ -1,4 +1,4 @@
-const Posts = require('../model/posts');
+const Post = require('../model/posts');
 
 const handleSuccess = require('../service/handleSuccess');
 const handleError = require('../service/handleError');
@@ -12,7 +12,7 @@ const posts = {
       const data = JSON.parse(body);
       const { name, image, content, type, tags } = data;
 
-      const newPost = await Posts.create({
+      const newPost = await Post.create({
         name,
         image,
         content,
@@ -52,7 +52,7 @@ const posts = {
         payload = { ...payload, tags: updateData.tags };
       }
 
-      const updatePostRes = await Posts.findByIdAndUpdate(id, payload, { new: true });
+      const updatePostRes = await Post.findByIdAndUpdate(id, payload, { new: true });
 
       handleSuccess(res, updatePostRes);
     } catch (e) {
@@ -60,7 +60,7 @@ const posts = {
     }
   },
   async deletePost(res) {
-    await Posts.deleteMany({});
+    await Post.deleteMany({});
 
     handleSuccess(res, []);
   },
@@ -71,7 +71,7 @@ const posts = {
 
       if(!isExist) throw new Error('post not exist.')
 
-      await Posts.findByIdAndDelete(id);
+      await Post.findByIdAndDelete(id);
 
       handleSuccess(res, 'delete success');
     } catch (e) {
