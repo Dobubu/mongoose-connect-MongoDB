@@ -4,13 +4,16 @@ const handleSuccess = require('../service/handleSuccess');
 const handleError = require('../service/handleError');
 
 const posts = {
-  fetchPost({res, postList:list }) {
+  async fetchPosts(res) {
+    const list = await Post.find();
+
     handleSuccess(res, list);
   },
   async createPost({ body, res }) {
     try {
       const data = JSON.parse(body);
       const { name, image, content, type, tags } = data;
+      if(!content) throw new Error('content field required.');
 
       const newPost = await Post.create({
         name,
@@ -25,8 +28,9 @@ const posts = {
       handleError(res, e);
     };
   },
-  async updatePostByID({ req, res, body, postList:list }) {
+  async updatePostByID({ req, res, body }) {
     try {
+      const list = await Post.find();
       const id = req.url.split('/').pop();
       const isExist = list.find(o => o.id === id);
       if(!isExist) throw new Error('post not exist.')
@@ -59,13 +63,14 @@ const posts = {
       handleError(res, e);
     }
   },
-  async deletePost(res) {
+  async deletePosts(res) {
     await Post.deleteMany({});
 
     handleSuccess(res, []);
   },
-  async deletePostByID({ req, res, postList:list }) {
+  async deletePostByID({ req, res }) {
     try {
+      const list = await Post.find();
       const id = req.url.split('/').pop();
       const isExist = list.find(o => o.id === id);
 

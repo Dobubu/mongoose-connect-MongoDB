@@ -5,7 +5,6 @@ const postsControllers = require('../controllers/posts');
 
 const routes = async (req, res) => {
   const { url, method } = req;
-  const postList = await Post.find();
 
   let body = '';
   req.on('data', chunk => {
@@ -13,20 +12,20 @@ const routes = async (req, res) => {
   });
 
   if(url === '/posts' && method === 'GET') {
-    postsControllers.fetchPost({ res, postList });
+    postsControllers.fetchPosts(res);
   } else if(url === '/posts' && method === 'POST') {
     req.on('end', () => {
       postsControllers.createPost({ body, res });
     });
   } else if(url.startsWith('/posts/') && method === 'PATCH') {
     req.on('end', () => {
-      postsControllers.updatePostByID({ req, res, body, postList });
+      postsControllers.updatePostByID({ req, res, body });
     });
   } else if(url === '/posts' && method === 'DELETE') {
-    postsControllers.deletePost(res);
+    postsControllers.deletePosts(res);
   } else if(url.startsWith('/posts/') && method === 'DELETE') {
     req.on('end', async () => {
-      postsControllers.deletePostByID({ req, res, postList });
+      postsControllers.deletePostByID({ req, res });
     });
   } else if(method === 'OPTIONS') {
     httpControllers.cors(res);
