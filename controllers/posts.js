@@ -1,4 +1,4 @@
-const Posts = require('../model/post');
+const Posts = require('../model/posts');
 
 const handleSuccess = require('../service/handleSuccess');
 const handleError = require('../service/handleError');

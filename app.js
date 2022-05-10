@@ -2,7 +2,7 @@ const http = require('http');
 
 require('./connections');
 
-const routes = require('./routes');
+const routes = require('./routes/posts');
 
 const requestListener = (req, res) => {
   routes(req, res);

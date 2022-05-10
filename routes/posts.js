@@ -1,4 +1,4 @@
-const Posts = require('../model/post');
+const Posts = require('../model/posts');
 
 const httpControllers = require('../controllers/cors');
 const postsControllers = require('../controllers/posts');
